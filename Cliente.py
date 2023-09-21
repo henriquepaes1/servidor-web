@@ -20,12 +20,12 @@ def main():
     sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sin.connect((hp, SERVER_PORT))
 
+    print(sin.recv(1024).decode())
+
     # Main loop: get and send lines of text
     while True:
-        buf = input()
-        # buf = buf[:MAX_LINE - 1]
-        buf = buf.encode()
-        sin.sendall(buf)
+        message = input()
+        sin.sendall(message.encode())
 
 if __name__ == "__main__":
     main()

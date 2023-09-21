@@ -17,12 +17,13 @@ def main():
         while True:
             new_s, addr = sin.accept()
             print(f"Connected by {addr}")   
+            new_s.send("Succesfully connected".encode())
 
             while True:
                 data = new_s.recv(MAX_LINE)
                 if not data:
                     break
-                sys.stdout.write(data.decode())
+                print(data.decode())
             
             new_s.close()
             print(f"Connection closed by {addr}")
