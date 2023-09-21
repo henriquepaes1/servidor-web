@@ -17,6 +17,7 @@ def main():
         while True:
             new_s, addr = sin.accept()
             print(f"Connected by {addr}")   
+            # Sends simple connection confirmation to the client
             new_s.send("Succesfully connected".encode())
 
             while True:

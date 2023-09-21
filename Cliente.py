@@ -20,6 +20,7 @@ def main():
     sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sin.connect((hp, SERVER_PORT))
 
+    # Print connection confirmation from the server
     print(sin.recv(1024).decode())
 
     # Main loop: get and send lines of text
