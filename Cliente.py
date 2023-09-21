@@ -2,7 +2,7 @@ import socket
 import sys
 
 SERVER_PORT = 5432
-MAX_LINE = 5
+MAX_LINE = 256
 
 def main():
     if len(sys.argv) == 2:
