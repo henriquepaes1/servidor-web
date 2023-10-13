@@ -1,34 +1,42 @@
 import socket
 import sys
 
-SERVER_PORT = 5432
+
+SERVER_PORT = 5430
 MAX_PENDING = 5
-MAX_LINE = 256
+MAX_LINE = 1024
+NOT_FOUND = "HTTP/1.1 404 ERRO\r\n"
 
 def main():
     try:
         # Build address data structure
-        sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sin.bind(('0.0.0.0', SERVER_PORT))
-        sin.listen(MAX_PENDING)
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind(('', SERVER_PORT))
+        server_socket.listen(MAX_PENDING)
 
         print(f"Server listening on port {SERVER_PORT}")
 
         while True:
-            new_s, addr = sin.accept()
+            client_connection, addr = server_socket.accept()
             print(f"Connected by {addr}")   
-            # Sends simple connection confirmation to the client
-            new_s.send("Succesfully connected".encode())
-
-            while True:
-                data = new_s.recv(MAX_LINE)
-                if not data:
-                    break
-                print(data.decode())
             
-            new_s.close()
-            print(f"Connection closed by {addr}")
-
+            data = client_connection.recv(MAX_LINE).decode()
+            print(data)
+            if data:
+                file_path = data.split("\r\n")[0].split(" ")[1][1:]
+                try: 
+                    with open(file_path, 'r') as file:
+                        file_text = file.read()
+                        content_length = len(file_text)
+                        content_type = "text/html"
+                        response = f"HTTP/1.1 200 OK\r\nContent-Length={content_length}\r\nContent-Type={content_type}\r\n\r\n{file_text}"
+                        client_connection.sendall(response.encode())      
+                except FileNotFoundError:
+                    client_connection.sendall(NOT_FOUND.encode()) 
+                finally:
+                    client_connection.close()
+                    print(f"Connection closed by {addr}")
+    
     except KeyboardInterrupt:
         print("\nServer terminated.")
         sys.exit(0)

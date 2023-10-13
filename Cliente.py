@@ -1,12 +1,18 @@
 import socket
 import sys
 
-SERVER_PORT = 5432
 MAX_LINE = 256
 
 def main():
-    if len(sys.argv) == 2:
+    if len(sys.argv) == 4:
         host = sys.argv[1]
+        port = sys.argv[2]
+        filename = sys.argv[3]
+    elif len(sys.argv) == 3:
+        host = sys.argv[1]
+        port = sys.argv[2]
+        filename = ""
+
     else:
         print("usage: simplex-talk host")
         sys.exit(1)
@@ -18,15 +24,15 @@ def main():
         sys.exit(1)
 
     sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sin.connect((hp, SERVER_PORT))
+    sin.connect((hp, int(port)))
 
-    # Print connection confirmation from the server
-    print(sin.recv(1024).decode())
+    request = "GET /{0} HTTP/1.1\r\nHost: {1}\r\n\r\n".format(filename, host)
+    sin.sendall(request.encode())
 
-    # Main loop: get and send lines of text
-    while True:
-        message = input()
-        sin.sendall(message.encode())
+    # Print received response from server
+    print(sin.recv(6000).decode())
+
+    sin.close()
 
 if __name__ == "__main__":
     main()
