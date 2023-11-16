@@ -9,12 +9,17 @@ NOT_FOUND = "HTTP/1.1 404 ERRO\r\n"
 
 def main():
     try:
+        server_host = sys.argv[1]
+
+        if(server_host.__contains__(":")):
         # Build address data structure
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind(('', SERVER_PORT))
+            server_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)  
+        else:
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
+        server_socket.bind((server_host, SERVER_PORT))
         server_socket.listen(MAX_PENDING)
 
-        print(f"Server listening on port {SERVER_PORT}")
+        print(f"Server on host {server_host} listening on port {SERVER_PORT}")
 
         while True:
             client_connection, addr = server_socket.accept()

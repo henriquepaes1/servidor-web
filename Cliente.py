@@ -18,12 +18,17 @@ def main():
         sys.exit(1)
 
     try:
-        hp = socket.gethostbyname(host) 
+        hp = socket.getaddrinfo(host, port)[0][4][0]
+        print("host found: " + hp)
     except socket.gaierror:
         print(f"simplex-talk: unknownn host: {host}")
         sys.exit(1)
 
-    sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    if(hp.__contains__(":")):
+        sin = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+    else:
+        sin = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
     sin.connect((hp, int(port)))
 
     request = "GET /{0} HTTP/1.1\r\nHost: {1}\r\n\r\n".format(filename, host)
