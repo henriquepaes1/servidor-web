@@ -1,8 +1,9 @@
 import socket
 import sys
+from threading import *
 
 
-SERVER_PORT = 5430
+SERVER_PORT = 5431
 MAX_PENDING = 5
 MAX_LINE = 1024
 NOT_FOUND = "HTTP/1.1 404 ERRO\r\n"
@@ -23,28 +24,35 @@ def main():
 
         while True:
             client_connection, addr = server_socket.accept()
-            print(f"Connected by {addr}")   
+            thread = Thread(target = createClientThread, args = [client_connection, addr])
+            thread.daemon = True
+            thread.start()
             
-            data = client_connection.recv(MAX_LINE).decode()
-            print(data)
-            if data:
-                file_path = data.split("\r\n")[0].split(" ")[1][1:]
-                try: 
-                    with open(file_path, 'r') as file:
-                        file_text = file.read()
-                        content_length = len(file_text)
-                        content_type = "text/html"
-                        response = f"HTTP/1.1 200 OK\r\nContent-Length={content_length}\r\nContent-Type={content_type}\r\n\r\n{file_text}"
-                        client_connection.sendall(response.encode())      
-                except FileNotFoundError:
-                    client_connection.sendall(NOT_FOUND.encode()) 
-                finally:
-                    client_connection.close()
-                    print(f"Connection closed by {addr}")
     
     except KeyboardInterrupt:
         print("\nServer terminated.")
         sys.exit(0)
+        
+# Create a worker thread to handle request
+def createClientThread(clientSocket, addr):
+    print(f"Connected by {addr} using thread {current_thread().name}")
+            
+    data = clientSocket.recv(MAX_LINE).decode()
+    print(data)
+    if data:
+        file_path = data.split("\r\n")[0].split(" ")[1][1:]
+        try: 
+            with open(file_path, 'r') as file:
+                file_text = file.read()
+                content_length = len(file_text)
+                content_type = "text/html"
+                response = f"HTTP/1.1 200 OK\r\nContent-Length={content_length}\r\nContent-Type={content_type}\r\n\r\n{file_text}"
+                clientSocket.sendall(response.encode())      
+        except FileNotFoundError:
+                clientSocket.sendall(NOT_FOUND.encode()) 
+        finally:
+                clientSocket.close()
+                print(f"Connection closed by {addr}")
 
 if __name__ == "__main__":
     main()

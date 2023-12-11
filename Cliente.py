@@ -1,5 +1,7 @@
 import socket
 import sys
+from threading import *
+import time
 
 MAX_LINE = 256
 
@@ -36,6 +38,8 @@ def main():
 
     # Print received response from server
     print(sin.recv(6000).decode())
+
+    time.sleep(5)
 
     sin.close()
 
